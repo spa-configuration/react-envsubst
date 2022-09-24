@@ -1,70 +1,64 @@
-# Getting Started with Create React App
+# SPA Configuration - React `envsubst`
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Example of using a separate JS file and `envsubst` to inject deploy-time configuration to a React single-page app.
 
-## Available Scripts
+## Notes
 
-In the project directory, you can run:
+- Bootstrapped using [Create React App]
+- If `envsubst` isn't available in your environment you can install it as part of the [`gettext`][gettext] package with
+  e.g. `apt-get install gettext`.
 
-### `npm start`
+## Usage
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This demo includes two sets of configuration:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- development (in `src/configuration.js`); and
+- production (in `build/config.js`).
 
-### `npm test`
+The latter is _generated_ from `config.template.js` (which is copied from `public/` into `build/` by `react-scripts`)
+using the NPM `configure` script. Any `${VAR_NAME}` in the template will be replaced with the corresponding value from
+the local environment. This script assumes the `build/` directory will exist and needs to be re-run after any rebuild:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```shell
+$ npm run build
 
-### `npm run build`
+> react-envsubst@0.1.0 build
+> react-scripts build
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Creating an optimized production build...
+Compiled successfully.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+File sizes after gzip:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  46.64 kB  build/static/js/main.36b327cb.js
+  1.79 kB   build/static/js/787.54cb1c77.chunk.js
+  541 B     build/static/css/main.073c9b0a.css
 
-### `npm run eject`
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The build folder is ready to be deployed.
+You may serve it with a static server:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  npm install -g serve
+  serve -s build
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Find out more about deployment here:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+  https://cra.link/deployment
 
-## Learn More
+$ MESSAGE=Production npm run configure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+> react-envsubst@0.1.0 configure
+> envsubst < build/config.template.js > build/config.js
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
 
-### Code Splitting
+This may seem closer to build-time than run-time configuration, but note that rather than rebuilding the whole
+application we're switching a single trivial file. You don't even need Node/NPM installed to do this, let alone all of
+the package's dependencies; the script is provided as a convenience for the local developer, but you can just use
+`envsubst` directly in e.g. CI environments. You just store the `build/` directory, which includes the template, as
+your single artefact and regenerate configuration at _deploy_ time as it's promoted through your environments.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+[Create React App]: https://create-react-app.dev/
+[gettext]: https://www.gnu.org/software/gettext/
